@@ -10,6 +10,9 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  define: {
+    __APP_TITLE__: JSON.stringify(process.env.VITE_APP_TITLE),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
