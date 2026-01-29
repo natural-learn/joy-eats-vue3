@@ -12,6 +12,14 @@ const router = createRouter({
         title: '员工登录'
       }
     },
+    {
+      path: '/home',
+      name: 'home',
+      component: HomeView,
+      meta: {
+        title: '悦享外卖-首页'
+      }
+    }
   ],
 })
 

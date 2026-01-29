@@ -10,16 +10,18 @@
                         <img src="/favicon.ico" alt="">
                         <h2>悦享外卖</h2>
                     </div>
-                    <el-form>
-                        <div class="input-group">
-                            <label for="username" style="font-weight: bold;">用户名</label><br/>
-                            <el-input type="text" id="username" placeholder="请输入用户名"/>
-                        </div>
-                        <div class="input-group">
-                            <label for="password" style="font-weight: bold; margin-top: 5px;">密码</label><br/>
-                            <el-input type="password" id="password" placeholder="请输入密码"/>
-                        </div>
-                        <el-button type="primary">登录</el-button>
+                    <el-form 
+                        :model="form"
+                        :rules="rules"
+                        ref="formRef"
+                        label-position="top">
+                        <el-form-item label="用户名" prop="username">
+                            <el-input type="text" placeholder="请输入用户名" v-model="form.username"/>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="password">
+                            <el-input type="password" placeholder="请输入密码" v-model="form.password"/>
+                        </el-form-item>
+                        <el-button type="primary" @click="login">登录</el-button>
                     </el-form>
                     <el-link type="primary">注册账号</el-link>
                 </div>
@@ -29,6 +31,55 @@
 </template>
 
 <script setup>
+import { Login } from '@/api/employee'
+import { ElMessage } from 'element-plus';
+import { reactive, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useApp } from '@/stores/app';
+
+const route = useRoute();
+const router = useRouter();
+
+const form = reactive({
+    username: 'admin',
+    password: '123456'
+})
+
+const formRef = ref();
+
+const rules = reactive({
+    username: [
+        { required: true, message: '请输入用户名', trigger: 'blur' },
+        { min: 3, max: 8, message: '用户名长度在3到8个字符之间', trigger: 'change' }
+    ],
+    password: [
+        { required: true, message: '请输入密码', trigger: 'blur' },
+        { min: 6, max: 10, message: '密码长度在6到10个字符之间', trigger: 'change' }
+    ]
+})
+
+const login = async () => {
+    const { code, data, message} = await Login(form);
+    if (code === 1) {
+        ElMessage.success('登录成功');
+        console.log(`route = ${route.query.redirect}`);
+        const targetPath = decodeURIComponent(route.query.redirect);
+        if (targetPath.startsWith('http')) {
+            // 如果是完整的URL，直接跳转
+            window.location.href = targetPath;
+        } else if (targetPath.startsWith('/')) {
+            // 如果是内部路由地址
+            router.push(targetPath);
+        } else {
+            console.log('跳转到首页');
+            router.push('/home'); // 默认跳转到首页
+        }
+        useApp().initToken(data.token);
+    } else {
+        console.log(`异常信息：${message}`);
+        ElMessage.error(`登录失败：${message}`);
+    }
+};
 </script>
 
 <style scoped lang="scss">
@@ -78,7 +129,4 @@
         }
     }
 }
-
-
-
 </style>

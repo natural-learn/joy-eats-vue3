@@ -10,6 +10,11 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  server: {
+    host: 'localhost',
+    port: 8096,
+    open: false
+  },
   define: {
     __APP_TITLE__: JSON.stringify(process.env.VITE_APP_TITLE),
   },
