@@ -18,7 +18,7 @@ const router = createRouter({
       component: HomeView,
       meta: {
         title: '悦享外卖-首页'
-      }
+      },
     }
   ],
 })

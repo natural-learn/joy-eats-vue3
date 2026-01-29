@@ -71,7 +71,6 @@ const login = async () => {
             // 如果是内部路由地址
             router.push(targetPath);
         } else {
-            console.log('跳转到首页');
             router.push('/home'); // 默认跳转到首页
         }
         useApp().initToken(data.token);

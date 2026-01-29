@@ -10,7 +10,6 @@ export class Storage {
     if (typeof value === 'object') {
       value = JSON.stringify(value);
     }
-    console.log("保存到localStorage")
     localStorage.setItem(key, value);
   }
 

@@ -2,3 +2,14 @@
     margin: 0;
     padding: 0;
 }
+
+html, body, #app {
+  height: 100%; /* 让根节点铺满视口高度 */
+  overflow: hidden; /* 禁止页面整体滚动（按需使用） */
+}
+
+:root {
+  font-size: 14px; /* 设置根字体大小，方便使用rem单位 */
+  font-family: 'inherit, Helvetica Neue', Arial, sans-serif; /* 设置全局字体 */
+  color: #333; /* 设置全局文字颜色 */
+}
