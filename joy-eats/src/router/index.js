@@ -4,21 +4,27 @@ import HomeView from '../views/HomeView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'login',
+    //   component: () => import('../views/LoginView.vue'),
+    //   meta: {
+    //     title: '员工登录'
+    //   }
+    // },
     {
       path: '/',
-      name: 'login',
-      component: () => import('../views/LoginView.vue'),
-      meta: {
-        title: '员工登录'
-      }
-    },
-    {
-      path: '/home',
       name: 'home',
       component: HomeView,
       meta: {
         title: '悦享外卖-首页'
       },
+      children: [
+        {
+          path: '/employee',
+          component: () => import('../views/Employee.vue')
+        }
+      ]
     }
   ],
 })

@@ -27,7 +27,6 @@ const sidebarStore = useSidebarStore();
 const { collapse } = storeToRefs(sidebarStore);
 const asideStyle = computed(() => {
   const width = collapse.value ? '64px' : '200px'
-  console.log('改变样式')
   return {
     width: width,
     transition: 'width 0.3s',
@@ -62,9 +61,9 @@ watch(collapse,(newValue,oldValue) => {
 }
 
 .el-main {
+    height: 100%;
     background-color: #f0f2f5;
     padding: 20px;
     padding-bottom: 110px;
-    box-sizing: border-box;
 }
 </style>
