@@ -21,8 +21,17 @@ const router = createRouter({
       },
       children: [
         {
-          path: '/employee',
-          component: () => import('../views/Employee.vue')
+          path: 'employee',
+          component: () => import('../views/employee/Index.vue'),
+          children: [
+            {
+              path: 'add',
+              component: () => import('../views/employee/add.vue'),
+              meta: {
+                title: '悦享外卖-添加员工'
+              }
+            }
+          ]
         }
       ]
     }

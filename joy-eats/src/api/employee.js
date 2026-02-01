@@ -10,3 +10,16 @@ export const Login = (dto) => {
     })
 }
 
+/**
+ * 分页查询
+ * @param {*} pageNum 
+ * @param {*} pageSize 
+ * @returns 
+ */
+export const GetEmployeePageList = (pageNum, pageSize) => {
+    return service({
+        url: `${baseURL}/page?` + `page=${pageNum}&pageSize=${pageSize}`,
+        method: 'get',
+    })
+}
+
