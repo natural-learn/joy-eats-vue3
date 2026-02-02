@@ -21,10 +21,8 @@
             </div>
             <el-select 
                 ref="selectRef"
-                v-model="selectedValue" 
                 placeholder="请选择"
                 :teleported="false"
-                @mouseenter="openSelectOptions"
                 @mouseleave="selectRef.toggleMenu(false)">
                 <el-option
                     v-for="item in options"
@@ -39,11 +37,13 @@
 
 <script setup>
 import { useSidebarStore } from '@/stores/sidebar'; 
+import { ref } from 'vue';
 const sidebarStore = useSidebarStore();
 const toggleCollapse = () => {
     console.log('开始折叠')
     sidebarStore.toggleCollapse();
 }
+const options = ref([]);
 </script>
 
 <style scoped lang="scss">

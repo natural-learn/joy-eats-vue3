@@ -16,10 +16,63 @@ export const Login = (dto) => {
  * @param {*} pageSize 
  * @returns 
  */
-export const GetEmployeePageList = (pageNum, pageSize) => {
+export const GetEmployeePageList = (dto) => {
     return service({
-        url: `${baseURL}/page?` + `page=${pageNum}&pageSize=${pageSize}`,
+        url: `${baseURL}/page`,
         method: 'get',
+        params: dto
     })
 }
 
+/**
+ * 添加员工
+ * @param {*} dto 
+ * @returns 
+ */
+export const AddEmployee = (dto) => {
+    return service({
+        url: baseURL,
+        method: 'post',
+        data: dto
+    })
+}
+
+/**
+ * 编辑员工
+ * @param {*} dto 
+ * @returns 
+ */
+export const UpdateEmployee = (dto) => {
+    return service({
+        url: baseURL,
+        method: 'put',
+        data: dto
+    })
+}
+
+/**
+ * 根据id删除员工信息
+ * @param {*} id 
+ * @returns 
+ */
+export const DeleteEmployeeById = (id) => {
+    return service({
+        url: `${baseURL}/${id}`,
+        method: 'delete',
+    })
+}
+
+/**
+ * 启用或禁用员工信息
+ * @param {*} status 
+ * @param {*} id 
+ * @returns 
+ */
+export const StartOrStop = (status, id) => {
+    console.log(`要修改的状态是：${status},员工id：${id}`)
+    return service({
+        url: `${baseURL}/status/${status}`,
+        method: 'post',
+        params: { id }
+    })
+}
