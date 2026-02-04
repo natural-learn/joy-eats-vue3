@@ -96,7 +96,7 @@
 
 <script setup>
 import { GetEmployeePageList, AddEmployee, UpdateEmployee, DeleteEmployeeById, StartOrStop } from '@/api/employee'
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { debounce } from 'lodash-es'
 import { ElMessage, ElMessageBox } from 'element-plus';
 
@@ -160,7 +160,7 @@ const handleSizeChange = (newSize) => {
 }
 
 /**
- * 添加员工
+ * 提交
  */
 const submit = async () => {
     defaultForm.sex = selectedRadioValue.value;
@@ -228,7 +228,6 @@ const fintPageInput = () => {
 // 启用禁用员工账号
 const startOrStop = async (row) => {
     if (row.status == 1) {
-        console.log(`当前状态：${row.status}，要禁用`)
         //启用状态，接下来要禁用
         const { code, message } = await StartOrStop(0, row.id);
         if (code === 1) {
@@ -237,7 +236,6 @@ const startOrStop = async (row) => {
             ElMessage.error(`禁用${row.name}的账号失败！`);
         }
     } else {
-        console.log(`当前状态：${row.status}，要启用`)
         //禁用状态，接下来要启用
         const { code, message } = await StartOrStop(1, row.id);
         if (code === 1) {
@@ -260,6 +258,9 @@ onMounted(() => {
     fetchData();
 })
 
+onUnmounted(() => {
+    findEmployeesDebounce.cancel();
+})
 </script>
 
 <style scoped lang="scss">

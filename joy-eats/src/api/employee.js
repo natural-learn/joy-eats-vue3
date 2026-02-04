@@ -6,7 +6,7 @@ export const Login = (dto) => {
     return service({
         url: `${baseURL}/login`,
         method: 'post',
-        data: dto
+        data: dto,
     })
 }
 
@@ -69,7 +69,6 @@ export const DeleteEmployeeById = (id) => {
  * @returns 
  */
 export const StartOrStop = (status, id) => {
-    console.log(`要修改的状态是：${status},员工id：${id}`)
     return service({
         url: `${baseURL}/status/${status}`,
         method: 'post',
