@@ -1,10 +1,6 @@
 <template>
     <div class="header-container">
         <div class="left">
-            <div class="logo">
-                <img width="40" height="40" src="/favicon.ico" alt="">
-                <span>悦享外卖</span>
-            </div>
             <div class="nav" @click="toggleCollapse">
                 <el-icon><Fold /></el-icon>
             </div>
@@ -40,8 +36,8 @@ import { useSidebarStore } from '@/stores/sidebar';
 import { ref } from 'vue';
 const sidebarStore = useSidebarStore();
 const toggleCollapse = () => {
-    console.log('开始折叠')
     sidebarStore.toggleCollapse();
+    sidebarStore.toggleTitleShow();
 }
 const options = ref([]);
 </script>
@@ -57,19 +53,6 @@ const options = ref([]);
     .left {
         display: flex;
         align-items: center;
-        .logo {
-            width: 200px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            span {
-                color: white;
-                font-size: 20px;
-                font-weight: bold;
-                line-height: 60px;
-                margin-left: 10px;
-            }
-        }
         .status {
             margin-left: 15px;
             padding: 0 3px 0 3px;
@@ -79,6 +62,7 @@ const options = ref([]);
         }
         .nav {
             cursor: pointer;
+            margin-top: 5px;
             .el-icon {
                 color: white;
                 font-size: 20px;

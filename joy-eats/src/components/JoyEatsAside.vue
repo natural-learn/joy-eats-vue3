@@ -1,5 +1,11 @@
 <template>
     <div class="aside-container">
+        <div class="header">
+            <div class="logo">
+                <img width="40" height="40" src="/favicon.ico" alt="">
+                <span v-show="isTitleShow">悦享外卖</span>
+            </div>
+        </div>
         <el-menu
             ref="menuRef"
             default-active="2"
@@ -23,11 +29,11 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
+import { useSidebarStore } from '@/stores/sidebar';
+import { storeToRefs } from 'pinia';
 
 const menuRef = ref(null);
-
-
 const menuList = [
     { path: '', label: '工作台', icon: 'HomeFilled' },
     { path: '', label: '数据统计', icon: 'PieChart' },
@@ -37,14 +43,39 @@ const menuList = [
     { path: '/category', label: '分类管理', icon: 'Menu' },
     { path: '/employee', label: '员工管理', icon: 'UserFilled' },
 ]
+
+const sidebarStore = useSidebarStore();
+const { isTitleShow } = storeToRefs(sidebarStore);
+
+
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .aside-container {
     width: 100%;
     height: 100vh;
     background-color: #ffffff;
     overflow: hidden;
+    .header {
+        height: 60px;
+        background-color: #3F83FD;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .logo {
+            width: 200px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            span {
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+                line-height: 60px;
+                margin-left: 10px;
+            }
+        }
+    }
 }
 
 .el-menu {
