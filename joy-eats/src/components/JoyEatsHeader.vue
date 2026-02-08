@@ -65,16 +65,26 @@
                 </template>
             </el-dialog>
             <el-select 
+                v-model="selectedValue"
                 ref="selectRef"
                 placeholder="请选择"
                 :teleported="false"
-                @mouseleave="selectRef.toggleMenu(false)">
+                @mouseleave="selectRef?.toggleMenu(false)"
+                @change="handleSelectChange"
+                >
                 <el-option
                     v-for="item in options"
-                    :key="item.value"
+                    :key="item.id"
                     :label="item.label"
-                    :value="item.value"
-                    />
+                    :value="item.id"
+                >
+                    <span style="display: flex; align-items: center;">
+                        <span>{{ item.label }}</span>
+                        <el-icon :size="16" style="margin-left: 8px;">
+                            <component :is="item.icon"/>
+                        </el-icon>
+                    </span>
+                </el-option>
             </el-select>
         </div>
     </div>
@@ -82,15 +92,40 @@
 
 <script setup>
 import { SetShopStatus, GetShopStatus } from '@/api/shop';
+import { Logout } from '@/api/employee';
 import { useSidebarStore } from '@/stores/sidebar'; 
 import { ElMessage } from 'element-plus';
 import { ref, onMounted, computed } from 'vue';
+import { Lock, SwitchButton } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 const sidebarStore = useSidebarStore();
 const toggleCollapse = () => {
     sidebarStore.toggleCollapse();
     sidebarStore.toggleTitleShow();
 }
-const options = ref([]);
+const selectedValue = ref(1);
+const options = ref([
+    { id: 1, label: '管理员', icon: '' },
+    { id: 2, label: '修改密码', icon: Lock },
+    { id: 3, label: '退出登录', icon: SwitchButton }
+]);
+const handleSelectChange = async (selectedValue) => {
+    if (selectedValue === 2) {
+        // 修改密码
+
+    } else if(selectedValue === 3) {
+        // 退出登录
+        const { code, message, data } = await Logout();
+        if (code === 1) {
+            ElMessage.success('退出登录成功');
+            router.push('/login');
+        } else {
+            ElMessage.error('退出登录失败');
+        }
+    }
+}
 
 const dialogVisible = ref(false);
 const setBusStatus = () => {

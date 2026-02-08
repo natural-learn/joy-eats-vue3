@@ -2,11 +2,27 @@ import service from "@/utils/request";
 
 const baseURL = 'admin/employee';
 
+/**
+ * 员工登录
+ * @param {*} dto 
+ * @returns 
+ */
 export const Login = (dto) => {
     return service({
         url: `${baseURL}/login`,
         method: 'post',
         data: dto,
+    })
+}
+
+/**
+ * 退出登录
+ * @returns 
+ */
+export const Logout = () => {
+    return service({
+        url: `${baseURL}/logout`,
+        method: 'post'
     })
 }
 
