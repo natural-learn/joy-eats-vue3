@@ -273,8 +273,12 @@ const submit = async () => {
 
 const fetchData = async () => {
     const { code, message, data } = await GetCategoryPageList(pageParams.value);
-    categoryList.value = data.records;
-    total.value = data.total;   
+    if (code === 1) {
+        categoryList.value = data.records;
+        total.value = data.total;   
+    } else {
+        ElMessage.error('数据获取异常，请重试');
+    }
 }
 
 onMounted(() => {
@@ -319,6 +323,8 @@ onMounted(() => {
                 }
             }
             .right {
+                display: flex;
+                align-items: center;
                 .dish-btn, .setmeal-btn {
                     width: 120px;
                     height: 40px;

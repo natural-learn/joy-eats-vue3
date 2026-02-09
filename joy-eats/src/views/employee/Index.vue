@@ -249,9 +249,12 @@ const startOrStop = async (row) => {
 
 const fetchData = async () => {
     const { code, message, data } = await GetEmployeePageList(pageParams.value);
-    employeeList.value = data.records;
-    total.value = data.total;
-    console.log(employeeList.value)
+    if (code === 1) {
+        employeeList.value = data.records;
+        total.value = data.total;
+    } else {
+        ElMessage.error('数据获取异常，请重试');
+    }
 }
 
 onMounted(() => {
