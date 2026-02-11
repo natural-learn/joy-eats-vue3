@@ -67,3 +67,16 @@ export const DeleteById = (id) => {
         params: { id }
     })
 }
+
+/**
+ * 根据类型(菜品/套餐)获取分类
+ * @param {*} type 
+ * @returns 
+ */
+export const GetList = (type) => {
+    return service({
+        url: `${baseURL}/list`,
+        method: 'get',
+        params: { type }
+    })
+}

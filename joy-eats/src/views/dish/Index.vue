@@ -6,25 +6,25 @@
                     <span style="white-space: nowrap;">菜品名称：</span>
                     <el-input 
                         v-model="pageParams.name"
-                        placeholder="请输入分类名称" 
+                        placeholder="请输入菜品名称" 
                     />
                     <span>菜品分类：</span>
-                    <el-select v-model="pageParams.type" placeholder="请选择分类" style="width: 150px">
+                    <el-select v-model="pageParams.categoryId" placeholder="请选择菜品分类" style="width: 150px">
                         <el-option
-                            v-for="item in categoryTypeList"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value"
+                            v-for="item in categoryList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id"
                             />
                     </el-select>
                     <div class="sell-status">
                         <span>售卖状态：</span>
-                        <el-select v-model="pageParams.type" placeholder="请选择分类" style="width: 150px">
+                        <el-select v-model="pageParams.status" placeholder="请选择售售卖状态" style="width: 150px">
                             <el-option
-                                v-for="item in categoryTypeList"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value"
+                                v-for="item in sellStatus"
+                                :key="item.id"
+                                :label="item.status"
+                                :value="item.id"
                                 />
                         </el-select>
                     </div>
@@ -32,20 +32,16 @@
                 </div>
                 <div class="right">
                     <span>批量删除菜品</span>
-                    <el-button class="dish-btn" type="primary" @click="addDishCategory">+ 新增菜品</el-button>
+                    <el-button class="dish-btn" type="primary" @click="addDish">+ 新增菜品</el-button>
                 </div>
             </div>
             <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%">
                 <el-form 
-                    :model="category"
-                    :rules="rules"
+                    :model="dish"
                     ref="formRef"
                     label-width="100px">
                     <el-form-item label="分类名称：" prop="name">
-                        <el-input v-model="category.name" style="width: 240px;" placeholder="请输入分类名称" />
-                    </el-form-item>
-                    <el-form-item label="排序：" prop="sort">
-                        <el-input v-model="category.sort" type="number" style="width: 240px;" placeholder="请输入排序" />
+                        <el-input v-model="dish.name" style="width: 240px;" placeholder="请输入菜品名称" />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submit">提交</el-button>
@@ -63,7 +59,7 @@
                     <el-table-column prop="image" label="菜品图片" width="150" #default="scope">
                         <el-image style="width: 40px;height: 40px;" :src="scope.row.image"/>
                     </el-table-column>
-                    <el-table-column prop="categoryName" label="菜品分类" width="150" :formatter="formatType"/>
+                    <el-table-column prop="categoryName" label="菜品分类" width="150"/>
                     <el-table-column prop="price" label="售价" width="100" />
                     <el-table-column label="售卖状态" width="150">
                         <template #default="scope">
@@ -75,13 +71,13 @@
                     </el-table-column>
                     <el-table-column prop="updateTime" label="最后操作时间" width="180" />
                     <el-table-column label="操作" align="center" width="280" #default="scope">
-                        <el-button type="primary" size="small" @click="editCategory(scope.row)">
+                        <el-button type="primary" size="small">
                             修改
                         </el-button>
-                        <el-button type="danger" size="small" @click="deleteById(scope.row)">
+                        <el-button type="danger" size="small">
                             删除
                         </el-button>
-                        <el-button type="warning" size="small" @click="startOrStop(scope.row)">
+                        <el-button type="warning" size="small">
                             {{ scope.row.status === 1 ? "停售" : "启售" }}
                         </el-button>
                     </el-table-column>
@@ -105,13 +101,23 @@
 
 <script setup>
 import { GetDishPageList } from '@/api/dish';
+import { GetList } from '@/api/category';
 import { ElMessage } from 'element-plus';
 import { ref, onMounted } from 'vue';
 
 const dialogVisible = ref(false);
+const dialogTitle = ref('新增菜品');
+const dish = ref({
+    name: '',
+    price: 0.0,
 
+})
 const dishList = ref([]);
-
+const categoryList = ref([])
+const sellStatus = ref([
+    { id: 0, status: '停售' },
+    { id: 1, status: '启售' }
+])
 const pageParams = ref({
     page: 1,
     pageSize: 5,
@@ -129,16 +135,58 @@ const handleSizeChange = (newSize) => {
     fetchData();
 }
 
+//最后一次查询的时间戳
+const lastQueryTime = ref(0);
+//冷却时长
+const COOLDOWN_DURATION = 5000;
+const find = () => {
+    // 获取当前时间戳
+    const now = Date.now();
+    // 计算距离上次查询的时间差
+    const timeDiff = now - lastQueryTime.value;
+    // 判断是否在冷却期内
+    if (timeDiff < COOLDOWN_DURATION) {
+        // 计算剩余冷却时间
+        const remainingTime = ((COOLDOWN_DURATION - timeDiff) / 1000).toFixed(1);
+        console.log('开始查询')
+        ElMessage({
+            type: 'warning',
+            message: `请等待${remainingTime}秒后再查询`,
+            duration: COOLDOWN_DURATION - timeDiff
+        })
+        return;
+    }
+    // 不在冷却期，执行正常查询逻辑
+    try {
+        // 更新最后查询时间戳（关键：标记本次查询时间）
+        lastQueryTime.value = now
+        fetchData();
+    } catch(error) {
+        // 异常处理
+        ElMessage.error('查询失败，请稍后重试')
+        // 异常时重置冷却时间（可选，避免因接口失败导致用户无法重试）
+        lastQueryTime.value = 0
+    }
+}
+
+const addDish = () => {
+
+}
+
+const submit = () => {
+
+}
 
 const fetchData = async () => {
     const { code, message, data } = await GetDishPageList(pageParams.value);
     if (code === 1) {
         dishList.value = data.records;
         total.value = data.total;
-        console.log('获取菜品数据：', dishList.value);
     } else {
         ElMessage.error('数据获取异常，请重试');
     }
+    const category_res = await GetList(1);
+    categoryList.value = category_res.data;
 }
 
 onMounted(() => {

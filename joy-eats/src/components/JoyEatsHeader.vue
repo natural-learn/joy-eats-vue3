@@ -95,8 +95,8 @@ import { SetShopStatus, GetShopStatus } from '@/api/shop';
 import { Logout } from '@/api/employee';
 import { useSidebarStore } from '@/stores/sidebar'; 
 import { ElMessage } from 'element-plus';
-import { ref, onMounted, computed } from 'vue';
-import { Lock, SwitchButton } from '@element-plus/icons-vue'
+import { ref, onMounted, computed, markRaw } from 'vue';
+import { User, Lock, SwitchButton } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
@@ -106,16 +106,17 @@ const toggleCollapse = () => {
     sidebarStore.toggleTitleShow();
 }
 const selectedValue = ref(1);
+// 使用 markRaw 避免可能的响应式警告
 const options = ref([
-    { id: 1, label: '管理员', icon: '' },
-    { id: 2, label: '修改密码', icon: Lock },
-    { id: 3, label: '退出登录', icon: SwitchButton }
+    { id: 1, label: '管理员', icon: markRaw(User) },
+    { id: 2, label: '修改密码', icon: markRaw(Lock) },
+    { id: 3, label: '退出登录', icon: markRaw(SwitchButton) }
 ]);
-const handleSelectChange = async (selectedValue) => {
-    if (selectedValue === 2) {
+const handleSelectChange = async (selectValue) => {
+    if (selectValue === 2) {
         // 修改密码
 
-    } else if(selectedValue === 3) {
+    } else if(selectValue === 3) {
         // 退出登录
         const { code, message, data } = await Logout();
         if (code === 1) {
