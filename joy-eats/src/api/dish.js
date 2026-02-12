@@ -39,3 +39,16 @@ export const UpdateDish = (dto) => {
     })
 }
 
+/**
+ * 菜品启售停售
+ * @param {*} status 
+ * @param {*} id 
+ * @returns 
+ */
+export const StartOrStop = (status, id) => {
+    return service({
+        url: `${baseURL}/status/${status}`,
+        method: 'post',
+        params: { id }
+    })
+}

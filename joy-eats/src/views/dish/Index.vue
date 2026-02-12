@@ -170,7 +170,7 @@
                         <el-button type="danger" size="small">
                             删除
                         </el-button>
-                        <el-button type="warning" size="small">
+                        <el-button type="warning" size="small" @click="startOrStop(scope.row)">
                             {{ scope.row.status === 1 ? "停售" : "启售" }}
                         </el-button>
                     </el-table-column>
@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { GetDishPageList, AddDish, UpdateDish } from '@/api/dish';
+import { GetDishPageList, AddDish, UpdateDish, StartOrStop } from '@/api/dish';
 import { GetList } from '@/api/category';
 import { ElMessage } from 'element-plus';
 import { ref, computed ,onMounted } from 'vue';
@@ -293,6 +293,27 @@ const updateDish = (row) => {
     dialogVisible.value = true;
     dish.value = {...row};
     dialogTitle.value = '修改菜品'
+}
+
+const startOrStop = async (row) => {
+    if (row.status == 1) {
+        //启用状态，接下来要禁用
+        const { code, message } = await StartOrStop(0, row.id);
+        if (code === 1) {
+            ElMessage.success(`禁用${row.name}的账号成功！`);
+        } else {
+            ElMessage.error(`禁用${row.name}的账号失败！`);
+        }
+    } else {
+        //禁用状态，接下来要启用
+        const { code, message } = await StartOrStop(1, row.id);
+        if (code === 1) {
+            ElMessage.success(`启用${row.name}的账号成功！`);
+        } else {
+            ElMessage.error(`启用${row.name}的账号失败！`);
+        }
+    }
+    fetchData();
 }
 
 const fetchData = async () => {
