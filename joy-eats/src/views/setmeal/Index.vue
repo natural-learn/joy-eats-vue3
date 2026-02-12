@@ -25,7 +25,7 @@
                                 :key="item.id"
                                 :label="item.status"
                                 :value="item.id"
-                            />
+                                />
                         </el-select>
                     </div>
                     <el-button type="primary" @click="find">查询</el-button>
@@ -47,7 +47,7 @@
                         <el-input v-model="dish.price" style="width: 240px;" placeholder="请输入菜品名称" />
                     </el-form-item>
                     <el-form-item label="菜品分类：">
-                        <el-select v-model="dish.categoryId" placeholder="请选择菜品分类" style="width: 150px">
+                        <el-select v-model="pageParams.categoryId" placeholder="请选择菜品分类" style="width: 150px">
                         <el-option
                             v-for="item in categoryList"
                             :key="item.id"
@@ -111,31 +111,6 @@
                         添加口味
                         </el-button>
                     </el-form-item>
-                    <el-form-item label="菜品图片">
-                        <div class="dish-upload-wrapper">
-                            <el-upload 
-                                class="dish-uploader" 
-                                action="http://localhost:8080/admin/common/upload"
-                                :show-file-list="false"
-                                @success="handleUploadSuccess"
-                            >
-                                <!-- 占位/图片容器 -->
-                                <div class="dish-image-wrapper">
-                                <!-- 图片：有值时显示，无值时隐藏 -->
-                                <img 
-                                    v-if="dish.image" 
-                                    class="dish-image" 
-                                    :src="dish.image" 
-                                    alt="菜品图片" 
-                                />
-                                <!-- 加号图标：始终显示（无图时），有图时隐藏 -->
-                                <el-icon v-else class="dish-uploader-icon">
-                                    <Plus />
-                                </el-icon>
-                                </div>
-                            </el-upload>
-                            </div>
-                    </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="submit">提交</el-button>
                         <el-button @click="dialogVisible = false">取消</el-button>
@@ -164,7 +139,7 @@
                     </el-table-column>
                     <el-table-column prop="updateTime" label="最后操作时间" width="180" />
                     <el-table-column label="操作" align="center" width="280" #default="scope">
-                        <el-button type="primary" size="small" @click="updateDish(scope.row)">
+                        <el-button type="primary" size="small">
                             修改
                         </el-button>
                         <el-button type="danger" size="small">
@@ -193,7 +168,7 @@
 </template>
 
 <script setup>
-import { GetDishPageList, AddDish, UpdateDish } from '@/api/dish';
+import { GetDishPageList } from '@/api/dish';
 import { GetList } from '@/api/category';
 import { ElMessage } from 'element-plus';
 import { ref, computed ,onMounted } from 'vue';
@@ -203,7 +178,7 @@ const dialogTitle = ref('新增菜品');
 const dish = ref({
     name: '',
     price: 0.0,
-    image: ''
+
 })
 const dishList = ref([]);
 const categoryList = ref([])
@@ -266,33 +241,9 @@ const addDish = () => {
     dialogVisible.value = true;
 }
 
-const submit = async () => {
+const submit = () => {
     const submitData = collectFlavorData();
     console.log(submitData)
-    if (!dish.value.id) {
-        dialogTitle.value = "添加员工";
-        const { code, message, data } = await AddDish(dish.value);
-        if (code === 1) {
-            ElMessage.success("添加成功");
-        } else {
-            ElMessage.error(message);
-        }
-    } else {
-        const { code, message, data } = await UpdateDish(dish.value);
-        if (code === 1) {
-            ElMessage.success("修改成功");
-        } else {
-            ElMessage.error(message);
-        }
-    }
-    dialogVisible.value = false;
-    fetchData();
-}
-
-const updateDish = (row) => {
-    dialogVisible.value = true;
-    dish.value = {...row};
-    dialogTitle.value = '修改菜品'
 }
 
 const fetchData = async () => {
@@ -378,11 +329,6 @@ const collectFlavorData = () => {
         }))
     return validData
 }
-
-const handleUploadSuccess = (response) => {
-    dish.value.image = response.data || ''
-}
-
 </script>
 
 <style scoped lang="scss">
@@ -519,53 +465,5 @@ const handleUploadSuccess = (response) => {
 /* 适配ElementPlus标签样式，和示例图一致 */
 :deep(.el-tag) {
   margin-right: 8px;
-}
-
-.dish-upload-container {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* 文字和图片框间距，可微调 */
-}
-
-/* 菜品图片文字标签 */
-.dish-label {
-  white-space: nowrap;
-  font-size: 14px;
-  color: #333;
-}
-
-/* 上传外层容器：保证点击区域和定位基准 */
-.dish-upload-wrapper {
-  cursor: pointer;
-}
-
-/* 上传组件容器：消除默认样式 */
-.dish-uploader {
-  display: block; /* 避免flex影响 */
-}
-
-/* 图片/图标容器：固定尺寸+边框+居中布局 */
-.dish-image-wrapper {
-  width: 150px; /* 图片框宽度，可调整 */
-  height: 150px; /* 图片框高度，可调整 */
-  border: 1px solid #dcdfe6; /* 浅灰色边框，匹配设计 */
-  background-color: #f8f9fa; /* 浅灰白背景，和截图一致 */
-  display: flex;
-  align-items: center;
-  justify-content: center; /* 核心：让内部元素（图片/加号）居中 */
-  overflow: hidden; /* 防止图片溢出 */
-}
-
-/* 菜品图片样式：填充容器 */
-.dish-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 图片不变形 */
-}
-
-/* 加号图标样式：大小+颜色+居中 */
-.dish-uploader-icon {
-  font-size: 24px; /* 加号大小，视觉更明显 */
-  color: #c0c4cc; /* 浅灰色，符合设计风格 */
 }
 </style>
