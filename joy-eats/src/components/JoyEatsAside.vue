@@ -38,7 +38,7 @@ const menuList = [
     { path: '', label: '工作台', icon: 'HomeFilled' },
     { path: '', label: '数据统计', icon: 'PieChart' },
     { path: '', label: '订单管理', icon: 'Document' },
-    { path: '', label: '套餐管理', icon: 'Present' },
+    { path: '/setmeal', label: '套餐管理', icon: 'Present' },
     { path: '/dish', label: '菜品管理', icon: 'DishDot' },
     { path: '/category', label: '分类管理', icon: 'Menu' },
     { path: '/employee', label: '员工管理', icon: 'UserFilled' },

@@ -1,13 +1,13 @@
 import service from "@/utils/request";
 
-const baseURL = 'admin/dish';
+const baseURL = 'admin/setmeal';
 
 /**
- * 分页获取菜品数据
+ * 分页查询套餐
  * @param {*} dto 
  * @returns 
  */
-export const GetDishPageList = (dto) => {
+export const GetSetmealPageList = (dto) => {
     return service({
         url: `${baseURL}/page`,
         method: 'get',
@@ -16,10 +16,11 @@ export const GetDishPageList = (dto) => {
 }
 
 /**
- * 新增菜品
+ * 添加套餐
  * @param {*} dto 
+ * @returns 
  */
-export const AddDish = (dto) => {
+export const AddSetmeal = (dto) => {
     return service({
         url: baseURL,
         method: 'post',
@@ -28,10 +29,10 @@ export const AddDish = (dto) => {
 }
 
 /**
- * 修改菜品
+ * 修改套餐
  * @param {*} dto 
  */
-export const UpdateDish = (dto) => {
+export const UpdateSetmeal = (dto) => {
     return service({
         url: baseURL,
         method: 'put',
@@ -40,7 +41,7 @@ export const UpdateDish = (dto) => {
 }
 
 /**
- * 根据Id删除菜品
+ * 根据Id删除套餐
  * @param {*} id 
  * @returns 
  */
@@ -48,20 +49,6 @@ export const DeleteById = (id) => {
     return service({
         url: baseURL,
         method: 'delete',
-        data: { id }
-    })
-}
-
-/**
- * 菜品启售停售
- * @param {*} status 
- * @param {*} id 
- * @returns 
- */
-export const StartOrStop = (status, id) => {
-    return service({
-        url: `${baseURL}/status/${status}`,
-        method: 'post',
         params: { id }
     })
 }

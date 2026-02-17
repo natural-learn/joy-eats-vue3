@@ -167,7 +167,7 @@
                         <el-button type="primary" size="small" @click="updateDish(scope.row)">
                             修改
                         </el-button>
-                        <el-button type="danger" size="small">
+                        <el-button type="danger" size="small" @click="deleteById(scope.row)">
                             删除
                         </el-button>
                         <el-button type="warning" size="small" @click="startOrStop(scope.row)">
@@ -195,7 +195,7 @@
 <script setup>
 import { GetDishPageList, AddDish, UpdateDish, StartOrStop } from '@/api/dish';
 import { GetList } from '@/api/category';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, computed ,onMounted } from 'vue';
 
 const dialogVisible = ref(false);
@@ -293,6 +293,20 @@ const updateDish = (row) => {
     dialogVisible.value = true;
     dish.value = {...row};
     dialogTitle.value = '修改菜品'
+}
+
+const deleteById = (row) => {
+    ElMessageBox.confirm('此操作将永久删除该菜品信息，是否继续？', 'Warning', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(async() => {
+        const { code } = await DeleteEmployeeById(row.id);
+        if (code === 1) {
+            ElMessage.success('删除成功');
+            fetchData();
+        }
+    })
 }
 
 const startOrStop = async (row) => {
