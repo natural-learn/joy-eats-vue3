@@ -45,7 +45,7 @@ export const UpdateSetmeal = (dto) => {
  * @param {*} id 
  * @returns 
  */
-export const DeleteById = (id) => {
+export const DeleteSetmealById = (id) => {
     return service({
         url: baseURL,
         method: 'delete',

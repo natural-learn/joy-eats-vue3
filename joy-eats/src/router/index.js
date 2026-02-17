@@ -35,6 +35,10 @@ const router = createRouter({
         {
           path: 'setmeal',
           component: () => import('../views/setmeal/Index.vue')
+        },
+        {
+          path: 'order',
+          component: () => import('../views/order/Index.vue')
         }
       ]
     }

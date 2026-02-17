@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { GetSetmealPageList, AddSetmeal, UpdateSetmeal, DeleteById } from '@/api/setmeal';
+import { GetSetmealPageList, AddSetmeal, UpdateSetmeal, DeleteSetmealById } from '@/api/setmeal';
 import { DeleteById, GetList } from '@/api/category';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref, computed ,onMounted } from 'vue';
@@ -197,7 +197,7 @@ const deleteById = (row) => {
         cancelButtonText: '取消',
         type: 'warning'
     }).then(async() => {
-        const { code } = await DeleteById(row.id);
+        const { code } = await DeleteSetmealById(row.id);
         if (code === 1) {
             ElMessage.success('删除成功');
             fetchData();
