@@ -39,6 +39,10 @@ const router = createRouter({
         {
           path: 'order',
           component: () => import('../views/order/Index.vue')
+        },
+        {
+          path: 'statistics',
+          component: () => import('../views/statistics/Index.vue')
         }
       ]
     }

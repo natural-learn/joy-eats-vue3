@@ -93,24 +93,11 @@ const find = () => {
         margin: 16px 0;
         display: flex;
         gap: 8px; /* 按钮之间的间距 */
-
-        .order-btn-group :deep(.active-btn) {
+        .active-btn:active {
             background-color: #409eff !important; /* 选中后的背景色，可自定义 */
             color: #ffffff !important; /* 选中后的文字色 */
             border-color: #409eff !important; /* 选中后的边框色 */
         }
-        .order-btn-group :deep(.el-button--plain:hover) {
-            color: #409eff;
-            border-color: #c6e2ff;
-            background-color: #ecf5ff;
-        }
-
-        .order-btn-group :deep(.el-button.is-disabled) {
-            background-color: #f5f7fa !important;
-            color: #c0c4cc !important;
-            border-color: #e5e6eb !important;
-        }
-
         .el-button {
             margin: 0;
             border-radius: 0;
