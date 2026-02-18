@@ -35,7 +35,7 @@ import { storeToRefs } from 'pinia';
 
 const menuRef = ref(null);
 const menuList = [
-    { path: '', label: '工作台', icon: 'HomeFilled' },
+    { path: '/dashboard', label: '首页', icon: 'HomeFilled' },
     { path: '/statistics', label: '数据统计', icon: 'PieChart' },
     { path: '/order', label: '订单管理', icon: 'Document' },
     { path: '/setmeal', label: '套餐管理', icon: 'Present' },

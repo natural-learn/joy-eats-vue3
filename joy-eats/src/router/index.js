@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Index from '../views/Index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,10 +15,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: Index,
       meta: {
         title: '悦享外卖-首页'
       },
+      redirect: '/dashboard',
       children: [
         {
           path: 'employee',
@@ -43,6 +44,10 @@ const router = createRouter({
         {
           path: 'statistics',
           component: () => import('../views/statistics/Index.vue')
+        },
+        {
+          path: 'dashboard',
+          component: () => import('../views/dashboard/Index.vue')
         }
       ]
     }
