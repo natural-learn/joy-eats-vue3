@@ -36,109 +36,154 @@
                 </div>
             </div>
             <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%">
-                <el-form 
-                    :model="dish"
-                    ref="formRef"
-                    label-width="100px">
-                    <el-form-item label="分类名称：" prop="name">
-                        <el-input v-model="dish.name" style="width: 240px;" placeholder="请输入菜品名称" />
+                <el-form
+                    ref="dishFormRef"
+                    :model="dishForm"
+                    :rules="dishRules"
+                    label-width="100px"
+                    class="dish-form"
+                >
+                    <!-- 菜品名称 -->
+                    <el-form-item label="菜品名称" prop="name">
+                        <el-input
+                            v-model="dishForm.name"
+                            placeholder="请填写菜品名称"
+                            maxlength="20"
+                            show-word-limit
+                        />
                     </el-form-item>
-                    <el-form-item label="菜品价格：" prop="name">
-                        <el-input v-model="dish.price" style="width: 240px;" placeholder="请输入菜品名称" />
-                    </el-form-item>
-                    <el-form-item label="菜品分类：">
-                        <el-select v-model="dish.categoryId" placeholder="请选择菜品分类" style="width: 150px">
-                        <el-option
-                            v-for="item in categoryList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id"
-                            />
+
+                    <!-- 菜品分类 -->
+                    <el-form-item label="菜品分类" prop="category">
+                        <el-select
+                            v-model="dishForm.category"
+                            placeholder="请选择菜品分类"
+                            style="width: 100%"
+                        >
+                        <!-- 这里可以替换为接口请求的分类数据 -->
+                        <el-option 
+                            v-for="category in categoryList" 
+                            :key="category.id" 
+                            :label="category.name" 
+                            :value="category.id" />
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="口味配置：">
-                        <div class="flavor-row" v-for="(row, rowIndex) in flavorRows" :key="rowIndex">
-                        <div class="flavor-name-col">
-                            <!-- 口味名改为下拉选择框 -->
-                            <el-select
-                                v-model="row.flavorName"
-                                placeholder="请选择口味"
-                                size="small"
-                                style="width: 80px;"
-                                @change="handleFlavorNameChange(rowIndex)"
-                            >
-                            <el-option
-                                v-for="option in flavorNameOptions"
-                                :key="option.value"
-                                :label="option.label"
-                                :value="option.value"
-                            />
-                            </el-select>
-                        </div>
-                        <div class="flavor-items-col">
-                            <!-- 具体口味项标签（仅展示+删除，无输入） -->
-                            <el-tag
-                                v-for="(item, itemIndex) in row.flavorItems"
-                                :key="itemIndex"
-                                closable
-                                @close="removeFlavorItem(rowIndex, itemIndex)"
-                                size="small"
-                                type="warning"
-                            >
-                            {{ item }}
-                            </el-tag>
-                        </div>
-                        <div class="flavor-opt-col">
-                            <!-- 行删除按钮 -->
-                            <el-button
-                                size="small"
-                                type="text"
-                                text-color="#f56c6c"
-                                @click="removeFlavorRow(rowIndex)"
-                            >
-                            删除
-                            </el-button>
-                        </div>
-                        </div>
 
-                        <!-- 添加口味行按钮（最多4行） -->
+                    <!-- 菜品价格 -->
+                    <el-form-item label="菜品价格" prop="price">
+                        <el-input
+                            class="price-input"
+                            v-model="dishForm.price"
+                            placeholder="请设置菜品价格"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            prefix="¥"
+                        />
+                    </el-form-item>
+
+                    <!-- 口味做法配置 -->
+                    <el-form-item label="口味做法配置">
+                        <!-- 口味名提示 -->
+                        <div class="flavor-tip">口味名（3个字内）</div>
+                        <!-- 动态口味列表 -->
+                        <div v-for="(flavor, index) in dishForm.flavors" :key="index" class="flavor-item">
+                        <!-- 口味下拉选择框 -->
+                        <el-select
+                            v-model="flavor.type"
+                            placeholder="请选择口味"
+                            style="width: 150px; margin-right: 10px"
+                            @change="loadFlavorTags(index)"
+                        >
+                            <el-option
+                                v-for="(tags, typeKey) in flavorTagMap"
+                                :key="typeKey"
+                                :label="getFlavorLabel(typeKey)"
+                                :value="typeKey"
+                                v-if="!selectedFlavorTypes.includes(typeKey) || flavor.type === typeKey"/>
+                        </el-select>
+                        
+                        <!-- 口味标签区域（核心新增） -->
+                        <div class="flavor-tags-box" style="flex: 1; margin-right: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                            <!-- 渲染对应口味的可关闭标签 -->
+                            <div 
+                            v-for="(tag, tagIndex) in flavor.tags" 
+                            :key="tagIndex" 
+                            class="flavor-tag"
+                            >
+                            {{ tag }}
+                            <span class="tag-close" @click.stop="removeFlavorTag(index, tagIndex)">X</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 删除按钮 -->
+                        <el-button
+                            type="text"
+                            text
+                            @click="removeFlavor(index)"
+                            class="flavor-delete"
+                        >
+                            删除
+                        </el-button>
+                        </div>
+                        <!-- 添加口味按钮（最多4行） -->
                         <el-button
                             type="warning"
-                            @click="addFlavorRow"
-                            :disabled="flavorRows.length >= 4"
-                            style="margin-top: 10px;"
+                            @click="addFlavor"
+                            :disabled="dishForm.flavors.length >= 4"
+                            style="margin-top: 10px"
                         >
-                        添加口味
+                        +添加口味
                         </el-button>
                     </el-form-item>
-                    <el-form-item label="菜品图片">
-                        <div class="dish-upload-wrapper">
-                            <el-upload 
-                                class="dish-uploader" 
-                                action="http://localhost:8080/admin/common/upload"
-                                :show-file-list="false"
-                                @success="handleUploadSuccess"
-                            >
-                                <!-- 占位/图片容器 -->
-                                <div class="dish-image-wrapper">
-                                <!-- 图片：有值时显示，无值时隐藏 -->
-                                <img 
-                                    v-if="dish.image" 
-                                    class="dish-image" 
-                                    :src="dish.image" 
-                                    alt="菜品图片" 
-                                />
-                                <!-- 加号图标：始终显示（无图时），有图时隐藏 -->
-                                <el-icon v-else class="dish-uploader-icon">
-                                    <Plus />
-                                </el-icon>
-                                </div>
-                            </el-upload>
-                            </div>
+                    <!-- 菜品图片 -->
+                    <el-form-item label="菜品图片" prop="image">
+                        <el-upload
+                            class="avatar-uploader"
+                            action="#"
+                            :auto-upload="false"
+                            :on-change="handleImageChange"
+                            :before-upload="beforeUpload"
+                            :file-list="imageFileList"
+                            list-type="picture-card"
+                            :limit="1"
+                        >
+                        <div v-if="imageFileList.length === 0">
+                            <i class="el-icon-plus avatar-uploader-icon"></i>
+                            <div class="el-upload__text">上传图片</div>
+                        </div>
+                        </el-upload>
+                        <!-- 图片上传提示 -->
+                        <div class="upload-tips">
+                        图片大小不超过2M<br>
+                        仅能上传PNG、JPEG、JPG类型图片<br>
+                        建议上传200*200或300*300尺寸的图片
+                        </div>
                     </el-form-item>
-                    <el-form-item>
-                        <el-button type="primary" @click="submit">提交</el-button>
-                        <el-button @click="dialogVisible = false">取消</el-button>
+
+                    <!-- 菜品描述 -->
+                    <el-form-item label="菜品描述">
+                        <el-input
+                            v-model="dishForm.desc"
+                            placeholder="菜品描述，最长200字"
+                            type="textarea"
+                            rows="4"
+                            maxlength="200"
+                            show-word-limit
+                        />
+                    </el-form-item>
+
+                    <!-- 按钮区域 -->
+                    <el-form-item label="">
+                        <el-button @click="resetForm">取消</el-button>
+                        <el-button type="primary" @click="submit('save')">保存</el-button>
+                        <el-button
+                        type="warning"
+                        @click="submitForm('saveAndContinue')"
+                        style="margin-left: 10px"
+                        >
+                        保存并继续添加
+                        </el-button>
                     </el-form-item>
                 </el-form>
             </el-dialog>
@@ -196,7 +241,7 @@
 import { GetDishPageList, AddDish, UpdateDish, StartOrStop } from '@/api/dish';
 import { GetList } from '@/api/category';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { ref, computed ,onMounted } from 'vue';
+import { ref, reactive ,computed ,onMounted } from 'vue';
 
 const dialogVisible = ref(false);
 const dialogTitle = ref('新增菜品');
@@ -267,26 +312,7 @@ const addDish = () => {
 }
 
 const submit = async () => {
-    const submitData = collectFlavorData();
-    console.log(submitData)
-    if (!dish.value.id) {
-        dialogTitle.value = "添加员工";
-        const { code, message, data } = await AddDish(dish.value);
-        if (code === 1) {
-            ElMessage.success("添加成功");
-        } else {
-            ElMessage.error(message);
-        }
-    } else {
-        const { code, message, data } = await UpdateDish(dish.value);
-        if (code === 1) {
-            ElMessage.success("修改成功");
-        } else {
-            ElMessage.error(message);
-        }
-    }
-    dialogVisible.value = false;
-    fetchData();
+    console.log(dishForm);
 }
 
 const updateDish = (row) => {
@@ -347,76 +373,89 @@ onMounted(() => {
     fetchData();
 })
 
-const flavorNameOptions = ref([
-  { label: '甜味', value: '甜味' },
-  { label: '温度', value: '温度' },
-  { label: '忌口', value: '忌口' },
-  { label: '辣度', value: '辣度' }
-])
+const dishFormRef = ref(null)
 
-// 预设：口味名对应的具体项（可根据业务调整）
-const flavorItemMap = {
-  '甜味': ['无糖', '少糖', '半糖', '多糖', '全糖'],
-  '温度': ['热饮', '常温', '去冰', '少冰', '多冰'],
-  '忌口': ['不要葱', '不要蒜', '不要香菜', '不要辣'],
-  '辣度': ['不辣', '微辣', '中辣', '重辣']
+// 定义口味类型对应的预设标签（核心新增）
+const flavorTagMap = {
+  sweet: ['无糖', '少糖', '半糖', '多糖', '全糖'], // 甜味对应的标签
+  spicy: ['不辣', '微辣', '中辣', '特辣'],         // 辣度对应的标签
+  temper: ['热饮', '常温', '去冰', '少冰', '多冰'], // 咸度对应的标签
+  diet: ['不要葱', '不要蒜', '不要青菜', '不要辣'] // 做法对应的标签
 }
 
-// 核心数据：口味行列表
-const flavorRows = ref([])
+// 表单数据（调整flavors结构：增加tags字段存储标签）
+const dishForm = reactive({
+  name: '', // 菜品名称
+  category: '', // 菜品分类
+  price: 0, // 菜品价格
+  flavors: [], // 口味列表：[{type: '', tags: []}]
+  image: null, // 菜品图片文件
+  desc: '' // 菜品描述
+})
 
-/**
- * 添加口味行（最多4行）
- */
-const addFlavorRow = () => {
-  if (flavorRows.value.length < 4) {
-    flavorRows.value.push({
-      flavorName: '', // 选中的口味名
-      flavorItems: [] // 该口味对应的具体项
-    })
+// 图片上传文件列表
+const imageFileList = ref([])
+
+// 表单验证规则（不变）
+const dishRules = reactive({
+  name: [
+    { required: true, message: '请填写菜品名称', trigger: 'blur' },
+    { max: 20, message: '菜品名称不能超过20个字', trigger: 'blur' }
+  ],
+  category: [
+    { required: true, message: '请选择菜品分类', trigger: 'change' }
+  ],
+  price: [
+    { required: true, message: '请设置菜品价格', trigger: 'blur' },
+    { type: 'number', min: 0, message: '价格必须大于等于0', trigger: 'blur' }
+  ],
+  image: [
+    { required: true, message: '请上传菜品图片', trigger: 'change' }
+  ]
+})
+
+const selectedFlavorTypes = computed(() => {
+    return dishForm.flavors.map(item => item.type).filter(type => type)
+})
+
+const getFlavorLabel = (typeKey) => {
+  const labelMap = {
+    sweet: '甜味',
+    spicy: '辣度',
+    temper: '温度',
+    diet: '忌口'
   }
+  return labelMap[typeKey] || typeKey
 }
 
-/**
- * 删除整行口味配置
- * @param {Number} rowIndex 行索引
- */
-const removeFlavorRow = (rowIndex) => {
-  flavorRows.value.splice(rowIndex, 1)
+// 添加口味（最多4行，调整tags初始值）
+const addFlavor = () => {
+  const maxFlavorCount = 4
+  if (dishForm.flavors.length >= maxFlavorCount) {
+    ElMessage.warning(`最多只能添加${maxFlavorCount}个口味！`)
+    return
+  }
+  // 新增一行空的口味数据，tags初始为空数组
+  dishForm.flavors.push({ type: '', tags: [] })
 }
 
-/**
- * 选择口味名后，自动填充对应的具体项
- * @param {Number} rowIndex 行索引
- */
-const handleFlavorNameChange = (rowIndex) => {
-  const currentRow = flavorRows.value[rowIndex]
-  // 根据选中的口味名，从预设映射中获取具体项
-  currentRow.flavorItems = flavorItemMap[currentRow.flavorName] || []
+// 加载对应口味的预设标签（核心新增）
+const loadFlavorTags = (index) => {
+  const flavorType = dishForm.flavors[index].type
+  // 根据选择的口味类型，加载对应的预设标签
+  dishForm.flavors[index].tags = flavorTagMap[flavorType] || []
 }
 
-/**
- * 删除指定行的某个具体口味项
- * @param {Number} rowIndex 行索引
- * @param {Number} itemIndex 项索引
- */
-const removeFlavorItem = (rowIndex, itemIndex) => {
-  flavorRows.value[rowIndex].flavorItems.splice(itemIndex, 1)
+// 删除单个口味标签（核心新增）
+const removeFlavorTag = (flavorIndex, tagIndex) => {
+  dishForm.flavors[flavorIndex].tags.splice(tagIndex, 1)
 }
 
-const collectFlavorData = () => {
-    const validData = flavorRows.value
-        .filter(row => row.flavorName.trim() && row.flavorItems.length > 0) // 过滤空行/无具体项的行
-        .map(row => ({
-        flavorName: row.flavorName,
-        selectedItems: [...row.flavorItems] // 深拷贝，避免后续修改影响
-        }))
-    return validData
+// 删除整行口味
+const removeFlavor = (index) => {
+  dishForm.flavors.splice(index, 1)
 }
 
-const handleUploadSuccess = (response) => {
-    dish.value.image = response.data || ''
-}
 
 </script>
 
@@ -522,33 +561,67 @@ const handleUploadSuccess = (response) => {
   background-color: #c0c4cc; /* 灰色 */
 }
 
-.flavor-config-container {
-  padding: 20px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  max-width: 800px;
+.flavor-tip {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
 }
 
-.flavor-row {
+/* 口味项布局 - 唯一保留 */
+.flavor-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  padding: 8px 0;
-  border-bottom: 1px dashed #e6e6e6;
+  margin-bottom: 8px;
+  width: 100%;
 }
 
-.flavor-name-col {
-  width: 120px;
+.flavor-delete {
+  color: #f56c6c; /* 红色删除文字 */
 }
 
-.flavor-items-col {
-  flex: 1;
+/* 口味标签样式（核心新增） */
+.flavor-tag {
+  background: #fff;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.flavor-opt-col {
-  width: 80px;
+.tag-close {
+  color: #ffc107;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.tag-close:hover {
+  color: #f56c6c;
+}
+
+/* 图片上传样式 - 唯一保留 */
+.avatar-uploader {
+  width: 180px;
+  height: 180px;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
   text-align: center;
+}
+
+.upload-tips {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #999;
+  line-height: 1.5;
 }
 
 /* 适配ElementPlus标签样式，和示例图一致 */
@@ -602,5 +675,12 @@ const handleUploadSuccess = (response) => {
 .dish-uploader-icon {
   font-size: 24px; /* 加号大小，视觉更明显 */
   color: #c0c4cc; /* 浅灰色，符合设计风格 */
+}
+
+.dish-form {
+  padding: 10px;
+  .el-form-item .el-input, .el-select {
+    width: 200px !important;
+  }
 }
 </style>
