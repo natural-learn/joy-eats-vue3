@@ -149,7 +149,7 @@
                             :limit="1"
                         >
                         <div v-if="imageFileList.length === 0">
-                            <i class="el-icon-plus avatar-uploader-icon"></i>
+                            <i class="el-icon-plus dish-image"></i>
                             <div class="el-upload__text">上传图片</div>
                         </div>
                         </el-upload>
@@ -608,7 +608,7 @@ const removeFlavor = (index) => {
   height: 180px;
 }
 
-.avatar-uploader-icon {
+.dish-image {
   font-size: 28px;
   color: #8c939d;
   width: 178px;
