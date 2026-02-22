@@ -5,11 +5,11 @@ export const ResultEnum = {
     /**
    * 成功
    */
-  SUCCESS : "200",
+  SUCCESS : 200,
   /**
    * 错误
    */
-  ERROR : "500",
+  ERROR : 500,
   /**
    * 访问令牌无效或过期
    */

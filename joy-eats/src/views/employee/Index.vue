@@ -97,8 +97,10 @@
 <script setup>
 import { GetEmployeePageList, AddEmployee, UpdateEmployee, DeleteEmployeeById, StartOrStop } from '@/api/employee'
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ResultEnum } from '@/enums/api/result_enum';
 import { debounce } from 'lodash-es'
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useCooldown } from '@/composables/useCooldown';
 
 const employeeList = ref([]);
 const emptyImage = '/src/assets/images/empty.png';
@@ -167,14 +169,14 @@ const submit = async () => {
     if (!employee.value.id) {
         dialogTitle.value = "添加员工";
         const { code, message, data } = await AddEmployee(employee.value);
-        if (code === 1) {
+        if (code === ResultEnum.SUCCESS) {
             ElMessage.success("添加成功");
         } else {
             ElMessage.error(message);
         }
     } else {
         const { code, message, data } = await UpdateEmployee(employee.value);
-        if (code === 1) {
+        if (code === ResultEnum.SUCCESS) {
             ElMessage.success("修改成功");
         } else {
             ElMessage.error(message);
@@ -205,7 +207,7 @@ const deleteById = (row) => {
         type: 'warning'
     }).then(async() => {
         const { code } = await DeleteEmployeeById(row.id);
-        if (code === 1) {
+        if (code === ResultEnum.SUCCESS) {
             ElMessage.success('删除成功');
             fetchData();
         }
@@ -215,13 +217,11 @@ const deleteById = (row) => {
 /**
  * 查询员工信息
  */
-const findEmployeesDebounce = debounce(() => {
-    fetchData();
-}, 300);
+const findEmployees = useCooldown(fetchData, 5000);
 
 const fintPageInput = () => {
     if (pageParams.value.name === '') {
-        findEmployeesDebounce();
+        findEmployees();
     }
 }
 
@@ -230,7 +230,7 @@ const startOrStop = async (row) => {
     if (row.status == 1) {
         //启用状态，接下来要禁用
         const { code, message } = await StartOrStop(0, row.id);
-        if (code === 1) {
+        if (ResultEnum.SUCCESS) {
             ElMessage.success(`禁用${row.name}的账号成功！`);
         } else {
             ElMessage.error(`禁用${row.name}的账号失败！`);
@@ -238,7 +238,7 @@ const startOrStop = async (row) => {
     } else {
         //禁用状态，接下来要启用
         const { code, message } = await StartOrStop(1, row.id);
-        if (code === 1) {
+        if (ResultEnum.SUCCESS) {
             ElMessage.success(`启用${row.name}的账号成功！`);
         } else {
             ElMessage.error(`启用${row.name}的账号失败！`);
@@ -249,7 +249,7 @@ const startOrStop = async (row) => {
 
 const fetchData = async () => {
     const { code, message, data } = await GetEmployeePageList(pageParams.value);
-    if (code === 1) {
+    if (ResultEnum.SUCCESS) {
         employeeList.value = data.records;
         total.value = data.total;
     } else {
@@ -261,9 +261,6 @@ onMounted(() => {
     fetchData();
 })
 
-onUnmounted(() => {
-    findEmployeesDebounce.cancel();
-})
 </script>
 
 <style scoped lang="scss">
